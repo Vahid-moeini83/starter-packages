@@ -1,15 +1,15 @@
-# نصب دسته‌جمعی Agent Skills — نسخه خودکفا (مستقیم از GitHub)
+# Batch install Agent Skills - self-contained version (runs directly from GitHub)
 #
-# استفاده مستقیم بدون کلون کردن ریپو (یک‌خطی در PowerShell):
+# One-liner, no repo clone needed:
 #   irm https://raw.githubusercontent.com/Vahid-moeini83/starter-packages/main/skills-installer/install.ps1 | iex
-#   (این حالت پیش‌فرض "all" را اجرا می‌کند)
+#   (this runs the default "all" mode)
 #
-# برای انتخاب حالت خاص، اول دانلود و بعد با پارامتر اجرا کنید:
+# To pick a specific mode, download first then run with a parameter:
 #   iwr https://raw.githubusercontent.com/Vahid-moeini83/starter-packages/main/skills-installer/install.ps1 -OutFile install.ps1
 #   .\install.ps1 -Mode frontend
 #   .\install.ps1 -Mode backend
 #
-# یا به صورت لوکال (اگر ریپو را کلون کرده‌اید):
+# Or locally (if you cloned the repo):
 #   .\install.ps1 -Mode frontend
 
 param(
@@ -20,28 +20,28 @@ param(
 $RawBase = "https://raw.githubusercontent.com/Vahid-moeini83/starter-packages/main/skills-installer"
 $ManifestUrl = "$RawBase/skills-manifest.json"
 
-# اگر اسکریپت به صورت فایل لوکال اجرا شده و manifest کنارش بود، از همان استفاده کن
+# If running as a local file and the manifest sits next to it, use that copy
 $ManifestPath = $null
 try {
     $ScriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path -ErrorAction Stop
     $LocalManifest = Join-Path $ScriptDir "skills-manifest.json"
     if (Test-Path $LocalManifest) {
         $ManifestPath = $LocalManifest
-        Write-Host "📄 استفاده از manifest محلی: $ManifestPath" -ForegroundColor DarkGray
+        Write-Host "Using local manifest: $ManifestPath" -ForegroundColor DarkGray
     }
 } catch {
-    # اجرا از طریق iex بوده (فایل لوکالی وجود ندارد) — مشکلی نیست، می‌رویم سراغ دانلود
+    # Running via iex (no local file) - fine, we will download instead
 }
 
 $TempManifest = $null
 if (-not $ManifestPath) {
-    Write-Host "🌐 دانلود manifest از GitHub..." -ForegroundColor DarkGray
+    Write-Host "Downloading manifest from GitHub..." -ForegroundColor DarkGray
     $TempManifest = Join-Path ([System.IO.Path]::GetTempPath()) "skills-manifest-$(Get-Random).json"
     try {
         Invoke-WebRequest -Uri $ManifestUrl -OutFile $TempManifest -UseBasicParsing
         $ManifestPath = $TempManifest
     } catch {
-        Write-Host "❌ دانلود manifest ناموفق بود: $ManifestUrl" -ForegroundColor Red
+        Write-Host "ERROR: Failed to download manifest: $ManifestUrl" -ForegroundColor Red
         exit 1
     }
 }
@@ -62,7 +62,7 @@ $SuccessList = @()
 $FailedList = @()
 $SkippedList = @()
 
-Write-Host "🚀 شروع نصب Skill ها (حالت: $Mode)`n" -ForegroundColor Cyan
+Write-Host "Starting Skill installation (mode: $Mode)`n" -ForegroundColor Cyan
 
 foreach ($category in $Categories) {
     $items = $Manifest.$category
@@ -72,12 +72,12 @@ foreach ($category in $Categories) {
         $skill = $item.skill
 
         if ([string]::IsNullOrEmpty($source) -or $source -eq "null") {
-            Write-Host "⏭  رد شد (source مشخص نیست): $name" -ForegroundColor Yellow
+            Write-Host "SKIP (no source defined): $name" -ForegroundColor Yellow
             $SkippedList += $name
             continue
         }
 
-        Write-Host "📦 در حال نصب: $name  (از $source)" -ForegroundColor White
+        Write-Host "Installing: $name  (from $source)" -ForegroundColor White
 
         $agentArgs = @("-g", "-a", "claude-code", "-a", "cursor", "-a", "kiro-cli", "-y")
 
@@ -89,17 +89,17 @@ foreach ($category in $Categories) {
 
         & npx @cmdArgs
         if ($LASTEXITCODE -eq 0) {
-            Write-Host "✅ موفق: $name`n" -ForegroundColor Green
+            Write-Host "OK: $name`n" -ForegroundColor Green
             $SuccessList += $name
         } else {
-            Write-Host "⚠️  ناموفق: $name (ادامه به مورد بعدی)`n" -ForegroundColor DarkYellow
+            Write-Host "FAILED: $name (continuing to next item)`n" -ForegroundColor DarkYellow
             $FailedList += $name
         }
     }
 }
 
 Write-Host "----------------------------------------"
-Write-Host "🎉 پایان نصب" -ForegroundColor Cyan
-Write-Host "✅ موفق ($($SuccessList.Count)): $($SuccessList -join ', ')" -ForegroundColor Green
-Write-Host "⚠️  ناموفق ($($FailedList.Count)): $($FailedList -join ', ')" -ForegroundColor DarkYellow
-Write-Host "⏭  رد شده/بدون source ($($SkippedList.Count)): $($SkippedList -join ', ')" -ForegroundColor Yellow
+Write-Host "Installation finished" -ForegroundColor Cyan
+Write-Host "Success ($($SuccessList.Count)): $($SuccessList -join ', ')" -ForegroundColor Green
+Write-Host "Failed ($($FailedList.Count)): $($FailedList -join ', ')" -ForegroundColor DarkYellow
+Write-Host "Skipped/no source ($($SkippedList.Count)): $($SkippedList -join ', ')" -ForegroundColor Yellow

@@ -1,12 +1,12 @@
 #!/usr/bin/env bash
-# نصب دسته‌جمعی Agent Skills — نسخه خودکفا (مستقیم از GitHub)
+# Batch install Agent Skills - self-contained version (runs directly from GitHub)
 #
-# استفاده مستقیم بدون کلون کردن ریپو:
+# One-liner, no repo clone needed:
 #   curl -fsSL https://raw.githubusercontent.com/Vahid-moeini83/starter-packages/main/skills-installer/install.sh | bash -s frontend
 #   curl -fsSL https://raw.githubusercontent.com/Vahid-moeini83/starter-packages/main/skills-installer/install.sh | bash -s backend
 #   curl -fsSL https://raw.githubusercontent.com/Vahid-moeini83/starter-packages/main/skills-installer/install.sh | bash -s all
 #
-# یا به صورت لوکال (اگر ریپو را کلون کرده‌اید):
+# Or locally (if you cloned the repo):
 #   ./install.sh frontend
 
 set -uo pipefail
@@ -15,28 +15,28 @@ RAW_BASE="https://raw.githubusercontent.com/Vahid-moeini83/starter-packages/main
 MANIFEST_URL="$RAW_BASE/skills-manifest.json"
 
 if ! command -v jq &> /dev/null; then
-  echo "❌ ابزار jq نصب نیست. لطفاً اول آن را نصب کنید (مثلاً: sudo apt install jq یا brew install jq)"
+  echo "ERROR: jq is not installed. Install it first (e.g. sudo apt install jq or brew install jq)"
   exit 1
 fi
 
 if ! command -v curl &> /dev/null; then
-  echo "❌ ابزار curl نصب نیست."
+  echo "ERROR: curl is not installed."
   exit 1
 fi
 
-# اگر فایل manifest به صورت محلی کنار اسکریپت وجود داشت، از همان استفاده کن
+# If running as a local file and the manifest sits next to it, use that copy
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" 2>/dev/null && pwd || echo "")"
 LOCAL_MANIFEST="$SCRIPT_DIR/skills-manifest.json"
 
 TMP_MANIFEST=""
 if [ -n "$SCRIPT_DIR" ] && [ -f "$LOCAL_MANIFEST" ]; then
   MANIFEST_PATH="$LOCAL_MANIFEST"
-  echo "📄 استفاده از manifest محلی: $MANIFEST_PATH"
+  echo "Using local manifest: $MANIFEST_PATH"
 else
   TMP_MANIFEST="$(mktemp)"
-  echo "🌐 دانلود manifest از GitHub..."
+  echo "Downloading manifest from GitHub..."
   if ! curl -fsSL "$MANIFEST_URL" -o "$TMP_MANIFEST"; then
-    echo "❌ دانلود manifest ناموفق بود: $MANIFEST_URL"
+    echo "ERROR: Failed to download manifest: $MANIFEST_URL"
     rm -f "$TMP_MANIFEST"
     exit 1
   fi
@@ -55,7 +55,7 @@ case "$MODE" in
   backend)  CATEGORIES=("backend" "shared") ;;
   all)      CATEGORIES=("frontend" "backend" "shared") ;;
   *)
-    echo "❌ حالت نامعتبر: $MODE (باید یکی از: all, frontend, backend باشد)"
+    echo "ERROR: invalid mode: $MODE (must be one of: all, frontend, backend)"
     exit 1
     ;;
 esac
@@ -64,7 +64,7 @@ SUCCESS_LIST=()
 FAILED_LIST=()
 SKIPPED_LIST=()
 
-echo "🚀 شروع نصب Skill ها (حالت: $MODE)"
+echo "Starting Skill installation (mode: $MODE)"
 echo ""
 
 for category in "${CATEGORIES[@]}"; do
@@ -75,12 +75,12 @@ for category in "${CATEGORIES[@]}"; do
     skill=$(jq -r ".\"$category\"[$i].skill" "$MANIFEST_PATH")
 
     if [ "$source" == "null" ] || [ -z "$source" ]; then
-      echo "⏭  رد شد (source مشخص نیست): $name"
+      echo "SKIP (no source defined): $name"
       SKIPPED_LIST+=("$name")
       continue
     fi
 
-    echo "📦 در حال نصب: $name  (از $source)"
+    echo "Installing: $name  (from $source)"
 
     if [ "$skill" == "null" ] || [ -z "$skill" ]; then
       CMD=(npx skills add "$source" -g -a claude-code -a cursor -a kiro-cli -y)
@@ -89,10 +89,10 @@ for category in "${CATEGORIES[@]}"; do
     fi
 
     if "${CMD[@]}"; then
-      echo "✅ موفق: $name"
+      echo "OK: $name"
       SUCCESS_LIST+=("$name")
     else
-      echo "⚠️  ناموفق: $name (ادامه به مورد بعدی)"
+      echo "FAILED: $name (continuing to next item)"
       FAILED_LIST+=("$name")
     fi
     echo ""
@@ -100,7 +100,7 @@ for category in "${CATEGORIES[@]}"; do
 done
 
 echo "----------------------------------------"
-echo "🎉 پایان نصب"
-echo "✅ موفق (${#SUCCESS_LIST[@]}): ${SUCCESS_LIST[*]:-هیچ}"
-echo "⚠️  ناموفق (${#FAILED_LIST[@]}): ${FAILED_LIST[*]:-هیچ}"
-echo "⏭  رد شده/بدون source (${#SKIPPED_LIST[@]}): ${SKIPPED_LIST[*]:-هیچ}"
+echo "Installation finished"
+echo "Success (${#SUCCESS_LIST[@]}): ${SUCCESS_LIST[*]:-none}"
+echo "Failed (${#FAILED_LIST[@]}): ${FAILED_LIST[*]:-none}"
+echo "Skipped/no source (${#SKIPPED_LIST[@]}): ${SKIPPED_LIST[*]:-none}"

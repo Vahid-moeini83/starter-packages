@@ -1,185 +1,97 @@
-# Git Guidelines
+# Git & Version Control — AI Agent Rules
 
-## Commit Messages
+## Branching Strategy
 
-### Format
+- `main` (or `master`) is always deployable. No direct commits to `main` — all changes via pull request.
+- Branch naming convention: `<type>/<short-description>`, e.g. `feat/user-onboarding`, `fix/cart-total-rounding`, `chore/upgrade-next-15`.
+- Types align with Conventional Commits: `feat`, `fix`, `chore`, `refactor`, `docs`, `test`, `perf`, `style`, `ci`, `build`.
+- Keep branches short-lived (days, not weeks). Rebase on `main` regularly to avoid large, painful merges.
+- One logical change per branch/PR. Do not bundle an unrelated refactor with a feature.
 
-```
-<type>(<scope>): <subject>
+## Commit Standards
 
-<body>
-
-<footer>
-```
-
-### Types
-
-- `feat`: New feature
-- `fix`: Bug fix
-- `docs`: Documentation changes
-- `style`: Code style changes (formatting, no logic change)
-- `refactor`: Code refactoring
-- `test`: Adding or updating tests
-- `chore`: Maintenance tasks
-
-### Examples
+Follow **Conventional Commits**:
 
 ```
-feat(auth): add login functionality
+<type>(<scope>): <short summary, imperative mood, no period>
 
-Implement OAuth login with Google and GitHub providers.
-Includes error handling and loading states.
+<optional body: what and why, not how>
 
-Closes #123
+<optional footer: BREAKING CHANGE:, Closes #123>
 ```
 
+Examples:
+
 ```
-fix(button): resolve click handler issue
-
-Button was triggering twice due to event bubbling.
-Added stopPropagation to prevent this.
+feat(auth): add magic-link login flow
+fix(checkout): correct tax calculation for EU orders
+refactor(billing): extract invoice PDF generation into service
+chore(deps): bump next to 15.1.2
 ```
 
-## Branch Strategy
+Rules:
 
-### Branch Naming
-
-- `feature/feature-name` - New features
-- `fix/bug-description` - Bug fixes
-- `hotfix/critical-fix` - Urgent production fixes
-- `refactor/component-name` - Code refactoring
-- `docs/documentation-update` - Documentation
-
-### Workflow
-
-1. Create branch from `main` or `develop`
-2. Make changes and commit
-3. Push branch and create pull request
-4. Code review and approval
-5. Merge to main branch
-6. Delete feature branch
-
-## Best Practices
-
-### Do
-
-- ✅ Commit often with small, focused changes
-- ✅ Write descriptive commit messages
-- ✅ Pull before pushing
-- ✅ Keep commits atomic (one logical change)
-- ✅ Review your changes before committing
-
-### Don't
-
-- ❌ Commit directly to main/master
-- ❌ Commit large binary files
-- ❌ Include sensitive data (keys, passwords)
-- ❌ Commit commented-out code
-- ❌ Use generic messages like "fix" or "update"
+- Subject line ≤ 72 characters, imperative mood ("add", not "added"/"adds").
+- Never commit generic messages like `"fix"`, `"update"`, `"wip"`, `"asdf"` to shared branches — squash/rewrite before opening a PR if local history is messy.
+- Each commit should leave the codebase in a working state (build passes) where feasible — makes bisecting reliable.
+- Reference the issue/ticket number in the footer when applicable.
 
 ## Pull Requests
 
-### PR Template
+- PR title follows the same Conventional Commit format as the squash-merge commit will.
+- PR description must include: what changed, why, how to test/verify, and screenshots/GIFs for any UI change.
+- Keep PRs small and reviewable — target under ~400 lines of diff where possible; split larger work into a stacked series.
+- Link the PR to its issue/ticket.
+- Never merge your own PR without at least one approval on team projects, even if you're confident — this is a process rule, not a trust issue.
+- All CI checks must be green before merge — no merging with a red build "to fix later."
+- Use **squash merge** for feature branches into `main` to keep history clean, unless the team has explicitly chosen merge commits for a reason (e.g., preserving co-author history).
 
-```markdown
-## Description
+## .gitignore Requirements
 
-Brief description of changes
-
-## Type of Change
-
-- [ ] Bug fix
-- [ ] New feature
-- [ ] Breaking change
-- [ ] Documentation update
-
-## Testing
-
-- [ ] Unit tests pass
-- [ ] Manual testing completed
-- [ ] No console errors
-
-## Screenshots
-
-(if applicable)
-
-## Related Issues
-
-Closes #issue-number
-```
-
-### Review Checklist
-
-- Code follows project style guide
-- Changes are well-tested
-- Documentation is updated
-- No unnecessary changes included
-- Commit history is clean
-
-## Useful Commands
-
-```bash
-# View uncommitted changes
-git status
-git diff
-
-# Undo last commit (keep changes)
-git reset HEAD~1
-
-# Update from remote
-git pull origin main
-
-# View commit history
-git log --oneline --graph
-
-# Stash changes temporarily
-git stash
-git stash pop
-
-# Rebase on main
-git rebase main
-
-# Cherry-pick a commit
-git cherry-pick <commit-hash>
-```
-
-## .gitignore Essentials
+Every Next.js/React project must ignore at minimum:
 
 ```
-# Dependencies
 node_modules/
-package-lock.json (if using yarn)
-yarn.lock (if using npm)
-
-# Build outputs
-dist/
-build/
 .next/
 out/
-
-# Environment variables
+build/
+dist/
 .env
 .env.local
-.env.production
-
-# IDE
-.vscode/
-.idea/
-*.swp
-*.swo
-
-# OS
-.DS_Store
-Thumbs.db
-
-# Testing
-coverage/
-
-# Logs
+.env.*.local
 *.log
-npm-debug.log*
+.DS_Store
+coverage/
+.turbo/
+.vercel/
+next-env.d.ts   # only if auto-generated and not customized
 ```
 
----
+- Never commit `node_modules`, build output, or `.env*` files (except `.env.example`).
+- If a secret is accidentally committed: rotate the secret immediately, then remove it from history (`git filter-repo` or BFG) — a simple revert commit is not sufficient since the secret remains in history.
 
-_This is a starter template. Customize based on your project needs._
+## Handling Merge Conflicts
+
+- Prefer rebasing feature branches onto `main` over merging `main` into the feature branch, to keep history linear — unless team convention says otherwise.
+- Resolve conflicts by understanding both changes' intent, not by blindly picking "ours" or "theirs."
+- After resolving conflicts, re-run the full test suite and build before pushing — a conflict resolution can silently reintroduce a bug even if it "looks right."
+
+## Code Review Etiquette (when the agent reviews or is reviewed)
+
+- Review for correctness, security, and maintainability first; style nits last (and only if not already handled by linter/formatter — if it's not automatable, question whether it's worth a comment).
+- Leave actionable, specific comments ("this will throw if `user` is null — add a guard" not "this looks off").
+- Distinguish blocking comments from suggestions (`nit:`, `question:`, `blocking:` prefixes help).
+- Approve only after confirming the PR does what it claims — pull it locally or read thoroughly, don't rubber-stamp.
+
+## Tags & Releases
+
+- Use Semantic Versioning (`MAJOR.MINOR.PATCH`) for anything published or independently deployed.
+- Tag releases (`v1.4.0`) and maintain a `CHANGELOG.md` (can be auto-generated from Conventional Commits via `changesets` or `semantic-release`).
+
+## Anti-Patterns
+
+- ❌ `git push --force` to a shared branch (`main`, or any branch others are working from). `--force-with-lease` on your own feature branch only.
+- ❌ Committing commented-out code "just in case" — delete it, git history preserves it.
+- ❌ Massive PRs mixing formatting-only changes with logic changes (obscures the real diff) — run formatters in a separate, dedicated commit/PR.
+- ❌ Rewriting history on a branch other people have already pulled from.
+- ❌ Bypassing branch protection rules even when "it's just a small fix."

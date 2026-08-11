@@ -1,109 +1,20 @@
-# Security Guidelines
+# General Security Best Practices & Guardrails
 
-## Authentication & Authorization
+## 🛑 Guardrails for AI Agent
 
-- Use Laravel Sanctum or Passport for API authentication
-- Implement proper password hashing (bcrypt/argon2)
-- Use middleware for route protection
-- Implement role-based access control (RBAC)
-- Use policy classes for authorization logic
+- **NO HARDCODED SECRETS**: NEVER hardcode secrets, passwords, tokens, or API keys in the source code. Always use environment variables or a Secret Manager.
+- **INJECTION PREVENTION**: Explicitly check for and prevent injection vulnerabilities (SQLi, Command Injection, XSS) when handling user input.
+- **NO EVAL**: Never use `eval()` or dynamically execute arbitrary user-provided code strings.
 
-## Input Validation & Sanitization
+## 📏 Standards
 
-- Validate all user input
-- Use Form Requests for validation logic
-- Sanitize data before storage
-- Never trust client data
-- Implement CSRF protection for web routes
+- **HTTPS Only**: Enforce HTTPS/TLS for all external communications.
+- **Least Privilege**: Apply the Principle of Least Privilege for database roles, internal service access, and cloud IAM roles.
+- **Headers**: Implement secure HTTP headers (e.g., HSTS, Content-Security-Policy, X-Frame-Options).
 
-## SQL Injection Prevention
+## 💡 Best Practices
 
-- Always use Eloquent or Query Builder
-- Never concatenate user input in raw queries
-- Use parameter binding for raw queries
-- Validate and sanitize database inputs
-
-## XSS Prevention
-
-- Use Blade's `{{ }}` for automatic escaping
-- Be cautious with `{!! !!}` unescaped output
-- Sanitize user-generated HTML content
-- Implement Content Security Policy (CSP)
-
-## CSRF Protection
-
-- Enabled by default in Laravel
-- Include `@csrf` directive in forms
-- Verify CSRF token on state-changing operations
-- Exclude API routes from CSRF middleware
-
-## API Security
-
-- Rate limit API endpoints
-- Implement proper CORS configuration
-- Use API tokens securely
-- Validate API requests
-- Log suspicious activities
-
-## File Upload Security
-
-- Validate file types and sizes
-- Store files outside public directory
-- Use random filenames
-- Scan for malware if possible
-- Set proper file permissions
-
-## Encryption & Hashing
-
-- Use Laravel's encryption for sensitive data
-- Hash passwords with bcrypt/argon2
-- Encrypt data at rest when necessary
-- Use HTTPS in production
-- Rotate encryption keys regularly
-
-## Error Handling
-
-- Don't expose stack traces in production
-- Log errors securely
-- Return generic error messages to users
-- Monitor error patterns
-- Implement proper exception handling
-
-## Dependencies
-
-- Keep Laravel and packages updated
-- Run security audits (`composer audit`)
-- Review dependencies before adding
-- Remove unused packages
-- Pin versions in production
-
-## Environment Configuration
-
-- Never commit `.env` file
-- Use strong `APP_KEY`
-- Disable debug mode in production
-- Secure session configuration
-- Use secure cookie settings
-
-## Headers & Security
-
-```php
-// Configure in middleware
-'Strict-Transport-Security' => 'max-age=31536000; includeSubDomains',
-'X-Content-Type-Options' => 'nosniff',
-'X-Frame-Options' => 'SAMEORIGIN',
-'X-XSS-Protection' => '1; mode=block',
-'Referrer-Policy' => 'strict-origin-when-cross-origin',
-```
-
-## Laravel Security Features
-
-- Use `Gate` and `Policy` for authorization
-- Implement `throttle` middleware for rate limiting
-- Use `signed` routes for temporary URLs
-- Encrypt sensitive model attributes
-- Use database query logging in development only
-
----
-
-_This is a starter template. Customize based on your project needs._
+- **Input Sanitization**: Sanitize and escape all user inputs, especially before rendering in HTML or passing to system commands.
+- **Rate Limiting**: Implement rate limiting at the API gateway or application level to prevent DDoS, brute force, and credential stuffing attacks.
+- **CSRF & CORS**: Configure CORS strictly (do not use `*` in production). Use CSRF tokens for session-based state-mutating requests.
+- **Dependencies**: Regularly scan and update third-party dependencies for known vulnerabilities.

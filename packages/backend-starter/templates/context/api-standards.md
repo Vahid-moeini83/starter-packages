@@ -1,120 +1,24 @@
-# API Standards
+# General API Standards & Guardrails
 
-## RESTful Design
+## 🛑 Guardrails for AI Agent
 
-- Use proper HTTP methods (GET, POST, PUT, PATCH, DELETE)
-- Follow resource-based URL patterns
-- Return appropriate status codes
-- Use consistent response structures
-- Implement proper versioning
+- **NO BREAKING CHANGES**: Do not introduce breaking changes to existing endpoints. If a breaking change is required, suggest versioning the API (e.g., `/v1/` to `/v2/`).
+- **VALIDATE EVERYTHING**: Always add validation for request payloads (body, query params, headers) before processing.
+- **DO NOT LEAK INTERNALS**: Never expose internal database IDs, stack traces, or internal server logic in API responses.
 
-## URL Structure
+## 📏 Standards
 
-```
-GET    /api/users          # List users
-POST   /api/users          # Create user
-GET    /api/users/{id}     # Get specific user
-PUT    /api/users/{id}     # Update user (full)
-PATCH  /api/users/{id}     # Update user (partial)
-DELETE /api/users/{id}     # Delete user
-```
+- **RESTful Conventions**:
+  - Use nouns, not verbs in URLs (e.g., `/users`, not `/getUsers`).
+  - Use proper HTTP Methods: `GET` (Read), `POST` (Create), `PUT` (Replace), `PATCH` (Update), `DELETE` (Remove).
+- **HTTP Status Codes**:
+  - `200 OK`, `201 Created`, `204 No Content`
+  - `400 Bad Request`, `401 Unauthorized`, `403 Forbidden`, `404 Not Found`, `422 Unprocessable Entity`
+  - `500 Internal Server Error`
+- **Payload Format**: Use `camelCase` for JSON request and response payloads. Return data wrapped in a consistent structure.
 
-## HTTP Status Codes
+## 💡 Best Practices
 
-- `200 OK` - Successful GET, PUT, PATCH
-- `201 Created` - Successful POST
-- `204 No Content` - Successful DELETE
-- `400 Bad Request` - Invalid request
-- `401 Unauthorized` - Authentication required
-- `403 Forbidden` - Insufficient permissions
-- `404 Not Found` - Resource not found
-- `422 Unprocessable Entity` - Validation errors
-- `500 Internal Server Error` - Server error
-
-## Response Format
-
-### Success Response
-
-```json
-{
-  "data": {
-    "id": 1,
-    "name": "John Doe",
-    "email": "john@example.com"
-  },
-  "meta": {
-    "timestamp": "2024-01-01T12:00:00Z"
-  }
-}
-```
-
-### Error Response
-
-```json
-{
-  "error": {
-    "message": "Validation failed",
-    "code": "VALIDATION_ERROR",
-    "details": {
-      "email": ["The email field is required."]
-    }
-  }
-}
-```
-
-### Paginated Response
-
-```json
-{
-  "data": [...],
-  "meta": {
-    "current_page": 1,
-    "per_page": 15,
-    "total": 100,
-    "last_page": 7
-  },
-  "links": {
-    "first": "http://api.example.com/users?page=1",
-    "last": "http://api.example.com/users?page=7",
-    "prev": null,
-    "next": "http://api.example.com/users?page=2"
-  }
-}
-```
-
-## Request Validation
-
-- Validate all incoming data
-- Return clear validation error messages
-- Use Laravel Form Requests
-- Sanitize input data
-- Implement rate limiting
-
-## API Versioning
-
-```
-/api/v1/users
-/api/v2/users
-```
-
-## Documentation
-
-- Document all endpoints
-- Include request/response examples
-- Specify required parameters
-- Document authentication requirements
-- Keep documentation up-to-date
-
-## Best Practices
-
-- Use API Resources for response transformation
-- Implement proper pagination
-- Add filtering and sorting capabilities
-- Use consistent naming conventions
-- Include HATEOAS links when appropriate
-- Implement request throttling
-- Log API usage and errors
-
----
-
-_This is a starter template. Customize based on your project needs._
+- **Pagination & Filtering**: Implement pagination (cursor-based or offset-based), filtering, and sorting for all endpoints that return lists.
+- **Documentation**: Document all endpoints using OpenAPI/Swagger. Keep the documentation in sync with the code.
+- **Idempotency**: Ensure `PUT`, `PATCH`, and `DELETE` requests are idempotent.

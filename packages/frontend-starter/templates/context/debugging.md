@@ -1,98 +1,65 @@
-# Debugging Guidelines
+# Debugging — AI Agent Rules
 
-## Browser DevTools
+## Methodology (follow in order)
 
-- Use console methods effectively (log, warn, error, table, group)
-- Master the debugger and breakpoints
-- Use network tab to inspect API calls
-- Profile performance with Performance tab
-- Inspect React/Vue components with browser extensions
+1. **Reproduce first.** Never propose a fix without a confirmed reproduction (steps, input, or failing test). If reproduction isn't possible, say so explicitly rather than guessing.
+2. **Isolate the layer.** Determine whether the bug is: Server Component render, Client Component render, hydration mismatch, data fetching, state management, styling, or build/config. Each has different tooling.
+3. **Read the actual error**, not the symptom. Trace stack traces to the first frame in project code (skip node_modules/framework frames first, but don't ignore them if project frames don't explain it).
+4. **Bisect.** For regressions, use `git bisect` or comment out recently changed code to narrow the diff before editing broadly.
+5. **Fix the root cause, not the symptom.** Do not silence errors with `try/catch` swallowing, `// @ts-ignore`, or `!important` unless the ticket explicitly asks for a stopgap — and if so, leave a `// TODO(reason, ticket)` comment.
+6. **Verify the fix** with the original repro AND a regression test before considering the task done.
 
-## Common Issues & Solutions
+## Next.js / React-Specific Debugging
 
-### State Management
+### Hydration Errors
 
-- Check Redux DevTools or Vue DevTools
-- Verify state updates are immutable
-- Look for missing dependencies in useEffect/computed
-- Check for stale closures
+- Check for: `Date.now()`, `Math.random()`, `window`/`document` access, or locale-dependent formatting rendered during SSR without guarding.
+- Fix pattern: move non-deterministic values into `useEffect` + state, or use `suppressHydrationWarning` only on the specific leaf node as a last resort — never at the root.
+- Verify server and client render the same markup by diffing `next build && next start` output vs dev.
 
-### Rendering Issues
+### Server Component vs Client Component bugs
 
-- Use React DevTools Profiler
-- Check for unnecessary re-renders
-- Verify key props in lists
-- Look for missing memoization
+- If a hook (`useState`, `useEffect`, `useContext`) errors as "can only be used in Client Components," check for a missing `"use client"` directive at the top of the file — and confirm it's the leaf, not the whole tree.
+- If a prop passed from Server to Client Component fails silently, check for non-serializable values (functions, Dates without conversion, class instances) crossing the boundary.
 
-### API Issues
+### Data Fetching Bugs
 
-- Inspect network requests and responses
-- Check request headers and auth tokens
-- Verify CORS configuration
-- Look for race conditions
+- Confirm caching behavior: `fetch` default caching, `revalidate`, `cache: 'no-store'`. A "stale data" bug is almost always a caching config issue in App Router — check this before touching component logic.
+- For client-side fetching (React Query/SWR), check query key stability — an unstable key (new object/array literal per render) is the most common cause of infinite refetch loops.
 
-## Debugging Techniques
+### State Bugs
 
-### Console Debugging
+- Stale closures: check `useEffect`/`useCallback`/`useMemo` dependency arrays before assuming a logic bug.
+- Check for state updates on unmounted components (missing cleanup in `useEffect`).
+- For "why did this re-render," recommend React DevTools Profiler over guessing.
 
-```javascript
-// Use descriptive labels
-console.log("User data:", user);
+### Styling Bugs (Tailwind)
 
-// Use console.table for arrays
-console.table(users);
+- Class not applying → check for: dynamic class name string concatenation (Tailwind JIT can't detect `` `text-${color}-500` ``; must use full static class names or a lookup map).
+- Specificity fights → check Tailwind config `important` setting and CSS layer order before adding `!important`.
+- Check `tailwind.config` `content` globs actually include the file if a class is silently missing in production build only.
 
-// Group related logs
-console.group("API Call");
-console.log("Request:", request);
-console.log("Response:", response);
-console.groupEnd();
-```
+## Tooling the Agent Should Use/Recommend
 
-### Breakpoint Debugging
+- **React DevTools** — component tree, re-render highlighting, Profiler tab.
+- **Next.js build output** — read `next build` warnings fully; they flag serialization issues, bundle size, and dynamic API misuse.
+- **`next dev --turbo` error overlay** — read the _full_ stack, including the "Call Stack" toggle, before concluding.
+- **Source maps** — ensure enabled in production error tracking (Sentry) so stack traces map to real files.
+- **`console.trace()`** over `console.log()` when the call origin is unclear.
+- **Network tab** — for data bugs, check actual request/response, not assumed behavior.
 
-- Set breakpoints in critical code paths
-- Use conditional breakpoints
-- Step through code execution
-- Inspect variable values at runtime
+## Debugging Checklist Before Declaring "Fixed"
 
-### Error Boundaries
+- [ ] Original repro steps no longer fail.
+- [ ] No new console errors/warnings introduced.
+- [ ] `npm run build` / `next build` succeeds (catches type errors and serialization issues that dev mode hides).
+- [ ] `npm run lint` and `tsc --noEmit` pass.
+- [ ] A regression test was added (unit or e2e) covering the exact bug scenario.
+- [ ] No debug artifacts left behind (`console.log`, `debugger`, commented-out code).
 
-- Implement error boundaries in React
-- Log errors to monitoring service
-- Show user-friendly error messages
-- Provide recovery options
+## Anti-Patterns
 
-## Performance Debugging
-
-- Use Chrome DevTools Performance tab
-- Check for memory leaks
-- Profile component render times
-- Analyze bundle size with webpack-bundle-analyzer
-
-## Mobile Debugging
-
-- Use Chrome Remote Debugging for Android
-- Use Safari Web Inspector for iOS
-- Test on real devices when possible
-- Check responsive design breakpoints
-
-## Logging Best Practices
-
-- Log meaningful information
-- Include context (user ID, timestamp, etc.)
-- Use different log levels appropriately
-- Remove console.logs before production
-- Use proper logging service in production
-
-## Common Pitfalls
-
-- Not checking browser console for errors
-- Ignoring warnings
-- Not testing edge cases
-- Assuming code works without verification
-- Not using version control for debugging
-
----
-
-_This is a starter template. Customize based on your project needs._
+- ❌ Wrapping code in try/catch just to stop an error from surfacing without understanding why it occurred.
+- ❌ Adding `useEffect` to "fix" a render issue that's actually a derived-state problem (compute during render instead).
+- ❌ Downgrading a dependency to "fix" a bug without understanding the actual breaking change.
+- ❌ Guessing at async race conditions without adding logging/timestamps to confirm ordering first.

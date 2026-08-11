@@ -1,0 +1,149 @@
+{
+  "frontend": [
+    {
+      "name": "frontend-design",
+      "source": "https://github.com/anthropics/skills",
+      "skill": "frontend-design"
+    },
+    {
+      "name": "vercel-react-best-practices",
+      "source": "https://github.com/vercel-labs/agent-skills",
+      "skill": "vercel-react-best-practices"
+    },
+    {
+      "name": "vercel-react-native-skills",
+      "source": "https://github.com/vercel-labs/agent-skills",
+      "skill": "vercel-react-native-skills"
+    },
+    {
+      "name": "web-design-guidelines",
+      "source": "https://github.com/vercel-labs/agent-skills",
+      "skill": "web-design-guidelines"
+    },
+    {
+      "name": "anti-ui-slop",
+      "source": "https://uizze.com/",
+      "skill": null
+    },
+    {
+      "name": "ui-radar",
+      "source": "https://uizze.com/",
+      "skill": null
+    },
+    {
+      "name": "ui-ux-prompt",
+      "source": "https://github.com/nextlevelbuilder/ui-ux-pro-max-skill",
+      "skill": "ui-ux-pro-max"
+    },
+    {
+      "name": "framer-motion-animator",
+      "source": "https://github.com/patricio0312rev/skills",
+      "skill": "framer-motion-animator"
+    }
+  ],
+  "backend": [
+    {
+      "name": "laravel-specialist",
+      "source": "https://github.com/jeffallan/claude-skills",
+      "skill": "laravel-specialist"
+    },
+    {
+      "name": "supabase-postgres-best-practices",
+      "source": "https://github.com/supabase/agent-skills",
+      "skill": "supabase-postgres-best-practices"
+    },
+    {
+      "name": "laravel-security",
+      "source": "https://github.com/affaan-m/ecc",
+      "skill": "laravel-security"
+    },
+    {
+      "name": "laravel-patterns",
+      "source": "https://github.com/affaan-m/ecc",
+      "skill": "laravel-patterns"
+    },
+    {
+      "name": "laravel-tdd",
+      "source": "https://github.com/affaan-m/ecc",
+      "skill": "laravel-tdd"
+    },
+    {
+      "name": "laravel-best-practice",
+      "source": "https://github.com/asyrafhussin/agent-skills",
+      "skill": "laravel-best-practices"
+    },
+    {
+      "name": "mysql",
+      "source": "https://github.com/planetscale/database-skills",
+      "skill": "mysql"
+    }
+  ],
+  "shared": [
+    {
+      "name": "find-skills",
+      "source": "https://github.com/vercel-labs/skills",
+      "skill": "find-skills"
+    },
+    {
+      "name": "grill-me",
+      "source": "https://github.com/mattpocock/skills",
+      "skill": "grill-me"
+    },
+    {
+      "name": "improve-codebase-architecture",
+      "source": "https://github.com/mattpocock/skills",
+      "skill": "improve-codebase-architecture"
+    },
+    {
+      "name": "test-driven-development",
+      "source": "https://github.com/obra/superpowers",
+      "skill": "test-driven-development"
+    },
+    {
+      "name": "skill-creator",
+      "source": "https://github.com/anthropics/skills",
+      "skill": "skill-creator"
+    },
+    {
+      "name": "docx",
+      "source": "https://github.com/anthropics/skills",
+      "skill": "docx"
+    },
+    {
+      "name": "pdf",
+      "source": "https://github.com/anthropics/skills",
+      "skill": "pdf"
+    },
+    {
+      "name": "xlsx",
+      "source": "https://github.com/anthropics/skills",
+      "skill": "xlsx"
+    },
+    {
+      "name": "pptx",
+      "source": "https://github.com/anthropics/skills",
+      "skill": "pptx"
+    },
+    {
+      "name": "seo-audit",
+      "source": "https://github.com/coreyhaines31/marketingskills",
+      "skill": "seo-audit"
+    },
+    {
+      "name": "Caveman",
+      "source": "https://github.com/juliusbrussee/caveman",
+      "skill": "caveman"
+    },
+    {
+      "name": "git-commit",
+      "source": "https://github.com/github/awesome-copilot",
+      "skill": "git-commit"
+    },
+    {
+      "name": "non-agents-official",
+      "source": null,
+      "skill": null,
+      "status": "TODO - needs verification on skills.sh"
+    }
+  ]
+}

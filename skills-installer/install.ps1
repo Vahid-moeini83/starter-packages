@@ -1,17 +1,3 @@
-# Batch install Agent Skills - self-contained version (runs directly from GitHub)
-#
-# One-liner, no repo clone needed:
-#   irm https://raw.githubusercontent.com/Vahid-moeini83/starter-packages/main/skills-installer/install.ps1 | iex
-#   (this runs the default "all" mode)
-#
-# To pick a specific mode, download first then run with a parameter:
-#   iwr https://raw.githubusercontent.com/Vahid-moeini83/starter-packages/main/skills-installer/install.ps1 -OutFile install.ps1
-#   .\install.ps1 -Mode frontend
-#   .\install.ps1 -Mode backend
-#
-# Or locally (if you cloned the repo):
-#   .\install.ps1 -Mode frontend
-
 param(
     [ValidateSet("all", "frontend", "backend")]
     [string]$Mode = "all"
@@ -20,7 +6,6 @@ param(
 $RawBase = "https://raw.githubusercontent.com/Vahid-moeini83/starter-packages/main/skills-installer"
 $ManifestUrl = "$RawBase/skills-manifest.json"
 
-# If running as a local file and the manifest sits next to it, use that copy
 $ManifestPath = $null
 try {
     $ScriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path -ErrorAction Stop
@@ -30,7 +15,6 @@ try {
         Write-Host "Using local manifest: $ManifestPath" -ForegroundColor DarkGray
     }
 } catch {
-    # Running via iex (no local file) - fine, we will download instead
 }
 
 $TempManifest = $null

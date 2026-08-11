@@ -1,13 +1,4 @@
 #!/usr/bin/env bash
-# Batch install Agent Skills - self-contained version (runs directly from GitHub)
-#
-# One-liner, no repo clone needed:
-#   curl -fsSL https://raw.githubusercontent.com/Vahid-moeini83/starter-packages/main/skills-installer/install.sh | bash -s frontend
-#   curl -fsSL https://raw.githubusercontent.com/Vahid-moeini83/starter-packages/main/skills-installer/install.sh | bash -s backend
-#   curl -fsSL https://raw.githubusercontent.com/Vahid-moeini83/starter-packages/main/skills-installer/install.sh | bash -s all
-#
-# Or locally (if you cloned the repo):
-#   ./install.sh frontend
 
 set -uo pipefail
 
@@ -24,7 +15,6 @@ if ! command -v curl &> /dev/null; then
   exit 1
 fi
 
-# If running as a local file and the manifest sits next to it, use that copy
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" 2>/dev/null && pwd || echo "")"
 LOCAL_MANIFEST="$SCRIPT_DIR/skills-manifest.json"
 

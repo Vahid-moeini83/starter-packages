@@ -1,91 +1,79 @@
-# Skills Installer
+# Skills Installer (Interactive)
 
-نصب دسته‌جمعی Agent Skills روی سیستم — یک‌بار در هر سیستم (global)، مستقل
-از پکیج‌های `frontend-starter` / `backend-starter`.
+Interactive, selective installation of Agent Skills on your system —
+one machine-wide setup, independent from the `dev-ai-starter` package
+(which handles per-project context/mcp files, not skills).
 
-این پوشه فقط با اسکریپت مستقیم اجرا می‌شود و **هرگز** جزو پکیج‌های npm که
-publish می‌شوند نیست (چون در فیلد `files` آن پکیج‌ها ذکر نشده). پس نصب
-`frontend-starter` یا `backend-starter` هیچ ربطی به این اسکریپت ندارد و
-باعث نصب اسکیل‌ها نمی‌شود — این دو کاملاً جدا هستند.
+## How it works
 
-## روال استفاده (خیلی ساده)
+Running the script walks you through three steps:
 
-### 🖥️ ویندوز (PowerShell)
+1. **Choose an area** — Frontend, Backend, or Both.
+2. **Pick skills** — a list is shown, grouped into sections
+   (`Frontend`, `Backend` if relevant, and always `Shared`). You choose
+   exactly which skills you want — nothing is installed automatically.
+3. **Confirm** — a summary of your selection is shown before anything
+   is installed.
 
-**برای فرانت‌اند + مشترک‌ها:**
+Skills with no verified source yet are marked `(no source yet)` in the
+list; selecting one is skipped automatically with a note in the final
+summary.
+
+## Usage
+
+### Windows (PowerShell)
+
 ```powershell
-irm https://raw.githubusercontent.com/Vahid-moeini83/starter-packages/main/skills-installer/install.ps1 -OutFile install.ps1; .\install.ps1 -Mode frontend
+iwr https://raw.githubusercontent.com/Vahid-moeini83/starter-packages/main/skills-installer/install.ps1 -OutFile install.ps1
+.\install.ps1
 ```
 
-**برای بک‌اند + مشترک‌ها:**
-```powershell
-irm https://raw.githubusercontent.com/Vahid-moeini83/starter-packages/main/skills-installer/install.ps1 -OutFile install.ps1; .\install.ps1 -Mode backend
-```
+Navigate the area menu with the arrow keys and Enter. In the skills
+list: **Space** toggles a skill, **A** toggles all, **Enter** confirms
+the selection.
 
-### 🐧 لینوکس / مک (bash)
+### Linux / macOS (bash)
 
-**برای فرانت‌اند + مشترک‌ها:**
 ```bash
-curl -fsSL https://raw.githubusercontent.com/Vahid-moeini83/starter-packages/main/skills-installer/install.sh | bash -s frontend
+curl -fsSL https://raw.githubusercontent.com/Vahid-moeini83/starter-packages/main/skills-installer/install.sh | bash
 ```
 
-**برای بک‌اند + مشترک‌ها:**
-```bash
-curl -fsSL https://raw.githubusercontent.com/Vahid-moeini83/starter-packages/main/skills-installer/install.sh | bash -s backend
-```
+Requires `jq` (`sudo apt install jq` or `brew install jq`). You'll be
+prompted to enter a comma-separated list of numbers (e.g. `1,3,5`) or
+type `all`.
 
-> نکته: نسخه bash به `jq` نیاز دارد (`sudo apt install jq` یا `brew install jq`).
-> نسخه PowerShell نیازی به ابزار جانبی ندارد.
+## Installation target
 
-## این دو دستور دقیقاً چه کاری می‌کنند؟
-
-هرکدام، اسکیل‌های `shared` را همیشه شامل می‌شوند، به‌علاوه دسته‌ی انتخابی:
-
-| دستور | نصب می‌کند |
-|---|---|
-| `-Mode frontend` / `bash -s frontend` | اسکیل‌های frontend + shared |
-| `-Mode backend` / `bash -s backend` | اسکیل‌های backend + shared |
-
-اسکریپت خودش لیست (`skills-manifest.json`) را مستقیم از گیت‌هاب دانلود
-می‌کند، پس نیازی به کلون کردن ریپو نیست — فقط همان یک خط دستور کافی است.
-
-## نکته: نصب بدون هیچ سوال تعاملی
-
-ابزار زیرین (`npx skills add`) به‌صورت پیش‌فرض هر بار یک سوال تعاملی
-می‌پرسد («این skill را برای کدام agent(ها) نصب کنم؟»). اسکریپت‌های این
-پوشه این سوال را با پرچم‌های زیر از قبل جواب داده‌اند، تا کل فرآیند
-بدون هیچ توقف یا ورودی دستی کامل شود:
+Every installed skill goes to all three agents below, globally on your
+machine (not per-project):
 
 ```
 -g -a claude-code -a cursor -a kiro-cli -y
 ```
 
-یعنی هر skill به‌صورت **global** و برای سه ابزار **Claude Code، Cursor،
-و Kiro CLI** نصب می‌شود، بدون نمایش هیچ تاییدیه‌ای. اگر بعداً خواستید
-agent دیگری (مثلاً `codex` یا `opencode`) هم اضافه شود، کافی‌ست همین
-بخش را در `install.sh` و `install.ps1` ویرایش کنید.
+To change the target agents, edit this line in both `install.sh` and
+`install.ps1`.
 
-## اضافه کردن Skill جدید (برای نگهداری آینده)
+## Adding a new skill (maintenance)
 
-کافی است در فایل `skills-manifest.json` این ریپو، یک آیتم جدید به دسته‌ی
-مربوطه (`frontend`, `backend`, یا `shared`) اضافه و روی گیت‌هاب push کنید:
+Add an entry to the relevant category (`frontend`, `backend`, or
+`shared`) in `skills-manifest.json`, then push to GitHub:
 
 ```json
 {
-  "name": "اسم-اسکیل",
+  "name": "skill-name",
   "source": "https://github.com/owner/repo",
-  "skill": "نام-دقیق-اسکیل-در-ریپو"
+  "skill": "exact-skill-name-in-repo"
 }
 ```
 
-اگر ریپوی مرجع فقط یک skill دارد و نیازی به فلگ `--skill` نیست، مقدار
-`skill` را `null` بگذارید. نیازی به تغییر `install.sh` یا `install.ps1`
-نیست — همه‌ی اعضای تیم با اجرای دوباره‌ی همان دستور بالا، نسخه‌ی جدید
-manifest را می‌گیرند.
+If the source repo only has one skill and `--skill` isn't needed, set
+`skill` to `null`. No changes to `install.sh` / `install.ps1` are
+needed — both scripts read the manifest dynamically and will show the
+new entry the next time someone runs them.
 
-## وضعیت فعلی Manifest
+## Current manifest status
 
-آیتم `non-agents-official` هنوز `source: null` دارد و در زمان اجرا
-به‌صورت خودکار **رد (skip)** می‌شود؛ در خلاصه‌ی پایانی اجرای اسکریپت زیر
-عنوان «رد شده» نمایش داده می‌شود. با پیدا کردن مرجع درست آن، کافی‌ست
-manifest را تکمیل و push کنید.
+`non-agents-official` still has `source: null` and will show as
+"(no source yet)" in the list; selecting it is a no-op (skipped with a
+note). Fill in its `source` once verified on skills.sh.

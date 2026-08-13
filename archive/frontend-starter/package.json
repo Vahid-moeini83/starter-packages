@@ -1,10 +1,10 @@
 {
-  "name": "backend-starter",
+  "name": "@dev-vahid/frontend-starter",
   "version": "0.1.0",
   "type": "module",
-  "description": "CLI tool to initialize backend projects with Kiro skills, context, and MCP configurations",
+  "description": "CLI tool to initialize frontend projects with Kiro skills, context, and MCP configurations",
   "bin": {
-    "backend-starter": "./bin/cli.js"
+    "frontend-starter": "bin/cli.js"
   },
   "files": [
     "bin",
@@ -13,10 +13,9 @@
   ],
   "keywords": [
     "cli",
-    "backend",
+    "frontend",
     "starter",
-    "kiro",
-    "laravel"
+    "kiro"
   ],
   "dependencies": {
     "commander": "^11.1.0",

@@ -1,10 +1,10 @@
 {
-  "name": "frontend-starter",
+  "name": "dev-ai-starter",
   "version": "0.1.0",
   "type": "module",
-  "description": "CLI tool to initialize frontend projects with Kiro skills, context, and MCP configurations",
+  "description": "CLI tool to initialize frontend, backend, or full-stack projects with AI agent skills, context rules, and MCP configuration",
   "bin": {
-    "frontend-starter": "./bin/cli.js"
+    "dev-ai-starter": "./bin/cli.js"
   },
   "files": [
     "bin",
@@ -13,9 +13,13 @@
   ],
   "keywords": [
     "cli",
-    "frontend",
     "starter",
-    "kiro"
+    "ai",
+    "skills",
+    "context",
+    "mcp",
+    "frontend",
+    "backend"
   ],
   "dependencies": {
     "commander": "^11.1.0",
